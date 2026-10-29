@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>k栋饮品</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background: #f5f5f5;
+      color: #222;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+    }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .app {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: auto;
+      background: #fff;
+      padding-bottom: 65px;
+    }
+    .shop-header {
+      height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #eee;
+    }
+    .shop-name {
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+    .category-bar {
+      display: flex;
+      height: 52px;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 5;
+    }
+    .category-item {
+      flex: 1;
+      border: 0;
+      background: #fff;
+      color: #888;
+      font-size: 16px;
+    }
+    .category-item.active {
+      color: #111;
+      font-weight: bold;
+      border-bottom: 3px solid #111;
+    }
+    .product-list {
+      padding: 0 15px;
+    }
+    .product-card {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 135px;
+      padding: 15px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .product-image {
+      width: 105px;
+      height: 105px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      background: linear-gradient(135deg, #f0dfce, #b87b4d);
+    }
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .product-card:nth-child(2) .product-image {
+      background: linear-gradient(135deg, #eee5cd, #ae9155);
+    }
+    .product-card:nth-child(3) .product-image {
+      background: linear-gradient(135deg, #ead8cf, #a8674d);
+    }
+    .product-card:nth-child(4) .product-image {
+      background: linear-gradient(135deg, #e0ebd8, #86a078);
+    }
+    .product-info {
+      flex: 1;
+    }
+    .product-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+    .product-desc {
+      color: #999;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .product-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .price {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .price::before {
+      content: "¥";
+      font-size: 13px;
+      margin-right: 2px;
+    }
+    .add-btn {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 50%;
+      background: #111;
+      color: #fff;
+      font-size: 22px;
+      line-height: 25px;
+    }
+    .sold-out-text {
+      color: #999;
+      font-size: 14px;
+    }
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      height: 64px;
+      display: flex;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      z-index: 10;
+    }
+    .nav-item {
+      flex: 1;
+      border: 0;
+      background: #fff;
+      color: #888;
+      font-size: 15px;
+    }
+    .nav-item.active {
+      color: #111;
+      font-weight: bold;
+    }
+    .nav-icon {
+      display: block;
+      font-size: 21px;
+      margin-bottom: 3px;
+    }
+    /* 我的页面 */
+    .mine-page {
+      display: none;
+      min-height: calc(100vh - 64px);
+      background: #fff;
+    }
+    /* 我的页面顶部标题，与商品页面保持一致 */
+    .mine-header {
+      height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+    }
+    /* 登录区域 */
+    .login-area {
+      display: flex;
+      align-items: center;
+      padding: 22px 15px;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+    }
+    .login-info {
+      flex: 1;
+    }
+    .login-title {
+      margin-bottom: 6px;
+      color: #222;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .login-desc {
+      color: #999;
+      font-size: 13px;
+    }
+    /* 登录按钮改为商品页同风格的黑色按钮 */
+    .login-button {
+      min-width: 72px;
+      height: 38px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 6px;
+      background: #111;
+      color: #fff;
+      font-size: 15px;
+    }
+    .login-button:active {
+      background: #333;
+    }
+    /* 我的菜单 */
+    .mine-menu {
+      padding: 0 15px;
+    }
+    .mine-menu-item {
+      width: 100%;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 0;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+      color: #222;
+      text-align: left;
+      font-size: 16px;
+    }
+    .mine-menu-item:active {
+      background: #f8f8f8;
+    }
+    .menu-arrow {
+      color: #999;
+      font-size: 23px;
+      font-weight: normal;
+    }
+    /* 购物车 */
+    .cart-button {
+      position: fixed;
+      right: 20px;
+      bottom: 80px;
+      width: 56px;
+      height: 56px;
+      border: 3px solid #111;
+      border-radius: 50%;
+      background: #fff;
+      z-index: 20;
+      font-size: 23px;
+    }
+    .cart-count {
+      position: absolute;
+      right: -6px;
+      top: -6px;
+      min-width: 20px;
+      height: 20px;
+      padding: 2px 5px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: red;
+      color: #fff;
+      font-size: 12px;
+    }
+    .cart-panel {
+      display: none;
+      position: fixed;
+      left: 50%;
+      bottom: 64px;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      max-height: 75vh;
+      overflow-y: auto;
+      padding: 18px;
+      background: #fff;
+      box-shadow: 0 -3px 15px rgba(0, 0, 0, .12);
+      z-index: 30;
+    }
+    .cart-panel.show {
+      display: block;
+    }
+    .cart-title,
+    .page-title,
+    .order-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .cart-title {
+      margin-bottom: 12px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .clear-cart {
+      color: #999;
+      font-size: 13px;
+      font-weight: normal;
+    }
+    .cart-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    .cart-empty {
+      padding: 15px 0 5px;
+      text-align: center;
+      color: #999;
+      font-size: 14px;
+    }
+    .cart-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 16px 0 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .pay-button,
+    .confirm-pay-button {
+      width: 100%;
+      height: 45px;
+      border: 0;
+      border-radius: 6px;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+    }
+    /* 支付页面和订单页面 */
+    .special-page {
+      display: none;
+      min-height: calc(100vh - 64px);
+      padding: 18px 15px;
+      background: #fff;
+    }
+    .page-title {
+      height: 45px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      font-size: 21px;
+      font-weight: bold;
+    }
+    .back-button {
+      border: 0;
+      background: transparent;
+      color: #555;
+      font-size: 15px;
+    }
+    .payment-box,
+    .order-card {
+      padding: 15px;
+      margin-bottom: 15px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      background: #fff;
+    }
+    /* 收货地址 */
+    .address-box {
+      margin: 15px 0;
+    }
+    .address-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+    .address-input {
+      width: 100%;
+      min-height: 45px;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+      resize: vertical;
+      color: #222;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .address-input:focus {
+      border-color: #111;
+    }
+    .address-input.error {
+      border-color: #d00;
+    }
+    .payment-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+    .payment-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 18px 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .order-tabs {
+      display: flex;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+    }
+    .order-tab {
+      flex: 1;
+      height: 42px;
+      border: 0;
+      background: #fff;
+      color: #888;
+      font-size: 16px;
+    }
+    .order-tab.active {
+      color: #111;
+      font-weight: bold;
+      border-bottom: 3px solid #111;
+    }
+    .order-header {
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .order-status {
+      color: #d97706;
+    }
+    .order-status.paid {
+      color: #16803c;
+    }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 7px 0;
+      color: #555;
+      font-size: 14px;
+    }
+    .order-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #eee;
+      font-weight: bold;
+    }
+    .small-pay-button {
+      padding: 7px 13px;
+      border: 0;
+      border-radius: 4px;
+      background: #111;
+      color: #fff;
+    }
+    .empty-order {
+      padding: 40px 0;
+      color: #999;
+      text-align: center;
+    }
+    .consumption-box {
+      margin-bottom: 15px;
+      padding: 18px;
+      background: #111;
+      color: #fff;
+      border-radius: 8px;
+    }
+    .consumption-label {
+      font-size: 14px;
+      opacity: .8;
+    }
+    .consumption-amount {
+      margin-top: 8px;
+      font-size: 30px;
+      font-weight: bold;
+    }
+    /* 商品详情页 */
+    .product-detail-page {
+      display: none;
+      min-height: calc(100vh - 64px);
+      padding: 18px 15px;
+      background: #fff;
+    }
+    .detail-header {
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      border-bottom: 1px solid #eee;
+      font-size: 21px;
+      font-weight: bold;
+    }
+    .detail-back {
+      border: 0;
+      background: transparent;
+      color: #555;
+      font-size: 15px;
+    }
+    .detail-image {
+      width: 100%;
+      height: 230px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f0dfce, #b87b4d);
+      font-size: 90px;
+    }
+    .detail-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+    .detail-title {
+      margin-bottom: 10px;
+      font-size: 25px;
+      font-weight: bold;
+    }
+    .detail-desc {
+      min-height: 45px;
+      margin-bottom: 20px;
+      color: #888;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .detail-price {
+      margin-bottom: 20px;
+      font-size: 25px;
+      font-weight: bold;
+    }
+    .detail-price::before {
+      content: "¥";
+      margin-right: 3px;
+      font-size: 16px;
+    }
+    .detail-add-button {
+      width: 100%;
+      height: 46px;
+      border: 0;
+      border-radius: 6px;
+      background: #111;
+      color: #fff;
+      font-size: 16px;
+    }
+    /* 购物车商品滚动区域 */
+    .cart-items {
+      max-height: 38vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 4px;
+    }
+    /* 美化购物车滚动条 */
+    .cart-items::-webkit-scrollbar {
+      width: 5px;
+    }
+    .cart-items::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background: #ccc;
+    }
+    .cart-items::-webkit-scrollbar-track {
+      background: #f5f5f5;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 商品页头部 -->
+    <header class="shop-header">
+      <div class="shop-name">k栋饮品</div>
+    </header>
+    <!-- 商品分类 -->
+    <div class="category-bar">
+      <button class="category-item active" onclick="changeCategory(this, 'coffee')">
+        咖啡
+      </button>
+      <button class="category-item" onclick="changeCategory(this, 'tea')">
+        茶
+      </button>
+      <button class="category-item" onclick="changeCategory(this, 'alcohol')">
+        酒
+      </button>
+    </div>
+    <!-- 商品页面 -->
+    <main id="productPage">
+      <div class="product-list" id="productList"></div>
+    </main>
+    <!-- 商品详情页面 -->
+    <section class="product-detail-page" id="productDetailPage">
+      <div class="detail-header">
+        <button class="detail-back" onclick="backFromDetail()">
+          ‹ 返回
+        </button>
+
+        <span>商品详情</span>
+        <span></span>
+      </div>
+
+      <div id="productDetailContent"></div>
+    </section>
+    <!-- 我的页面 -->
+    <section class="mine-page" id="minePage">
+      <!-- 与商品页统一的顶部标题 -->
+      <header class="mine-header">
+        <div class="shop-name">我的</div>
+      </header>
+      <!-- 登录区域 -->
+      <div class="login-area">
+        <div class="login-info">
+          <div class="login-title">欢迎来到 k栋饮品</div>
+          <div class="login-desc">登录后查看订单和优惠信息</div>
+        </div>
+        <button class="login-button" onclick="login()">
+          登录
+        </button>
+      </div>
+      <!-- 菜单列表 -->
+      <div class="mine-menu">
+        <button class="mine-menu-item" onclick="showOrders()">
+          <span>查看订单</span>
+          <span class="menu-arrow">›</span>
+        </button>
+        <button class="mine-menu-item" onclick="showMessage('优惠券')">
+          <span>优惠券</span>
+          <span class="menu-arrow">›</span>
+        </button>
+        <button class="mine-menu-item" onclick="showMessage('关于我们')">
+          <span>关于我们</span>
+          <span class="menu-arrow">›</span>
+        </button>
+      </div>
+    </section>
+    <!-- 支付页面 -->
+    <section class="special-page" id="paymentPage">
+      <div class="page-title">
+        <button class="back-button" onclick="backToProduct()">‹ 返回</button>
+        <span>订单支付</span>
+        <span></span>
+      </div>
+      <div id="paymentContent"></div>
+    </section>
+    <!-- 订单页面 -->
+    <section class="special-page" id="ordersPage">
+      <div class="page-title">
+        <button class="back-button" onclick="backToMine()">‹ 返回</button>
+        <span>我的订单</span>
+        <span></span>
+      </div>
+      <div class="order-tabs">
+        <button class="order-tab active" id="unpaidTab"
+                onclick="changeOrderTab('unpaid', this)">
+          未支付
+        </button>
+        <button class="order-tab" id="paidTab"
+                onclick="changeOrderTab('paid', this)">
+          已支付
+        </button>
+      </div>
+      <div id="ordersContent"></div>
+    </section>
+    <!-- 购物车按钮 -->
+    <button class="cart-button" onclick="toggleCart()">
+      🛒
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+    <!-- 购物车面板 -->
+    <div class="cart-panel" id="cartPanel">
+      <div class="cart-title">
+        <span>购物车</span>
+        <span class="clear-cart" onclick="clearCart()">清空</span>
+      </div>
+      <div id="cartContent">
+        <div class="cart-empty">购物车还是空的</div>
+      </div>
+    </div>
+    <!-- 底部导航 -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="showPage('product', this)">
+        <span class="nav-icon">☕</span>
+        商品
+      </button>
+      <button class="nav-item" onclick="showPage('mine', this)">
+        <span class="nav-icon">♙</span>
+        我的
+      </button>
+    </nav>
+  </div>
+  <script>
+    const defaultProducts = {
+      coffee: [
+        {
+          name: "美式咖啡",
+          desc: "醇香浓郁，清爽回甘",
+          price: 15,
+          icon: "☕"
+        },
+        {
+          name: "拿铁咖啡",
+          desc: "咖啡与牛奶的经典搭配",
+          price: 20,
+          icon: "🥤"
+        },
+        {
+          name: "焦糖玛奇朵",
+          desc: "香甜焦糖，奶香浓郁",
+          price: 22,
+          icon: "🍮"
+        },
+        {
+          name: "抹茶拿铁",
+          desc: "清新抹茶与细腻奶泡",
+          price: 21,
+          icon: "🍵"
+        }
+      ],
+      tea: [
+        {
+          name: "茉莉绿茶",
+          desc: "清香淡雅，口感清爽",
+          price: 12,
+          icon: "🍵"
+        },
+        {
+          name: "柠檬红茶",
+          desc: "酸甜清新，冰爽解渴",
+          price: 14,
+          icon: "🍋"
+        },
+        {
+          name: "乌龙茶",
+          desc: "茶香浓郁，回味悠长",
+          price: 13,
+          icon: "🫖"
+        },
+        {
+          name: "水果茶",
+          desc: "多种水果，酸甜可口",
+          price: 18,
+          icon: "🍹"
+        }
+      ],
+      alcohol: [
+        {
+          name: "精酿啤酒",
+          desc: "麦芽香气浓郁，口感清爽",
+          price: 18,
+          icon: "🍺"
+        },
+        {
+          name: "梅子酒",
+          desc: "酸甜顺口，果香清新",
+          price: 28,
+          icon: "🍷"
+        },
+        {
+          name: "威士忌",
+          desc: "酒体醇厚，回味悠长",
+          price: 48,
+          icon: "🥃"
+        },
+        {
+          name: "果味鸡尾酒",
+          desc: "果香浓郁，清爽微醺",
+          price: 32,
+          icon: "🍸"
+        }
+      ]
+    };
+
+    function loadCustomerProducts() {
+      const savedProducts = localStorage.getItem("k_products");
+      if (!savedProducts) {
+        return defaultProducts;
+      }
+      try {
+        const adminProducts = JSON.parse(savedProducts);
+        const result = {
+          coffee: [],
+          tea: [],
+          alcohol: []
+        };
+        adminProducts.forEach(product => {
+          if (product.status === "off_sale") {
+            return;
+          }
+          if (result[product.category]) {
+            result[product.category].push({
+              id: product.id,
+              name: product.name,
+              desc: product.desc || "",
+              price: Number(product.price),
+              icon: product.icon || "🥤",
+              image: product.image || "",
+              stock: Number(product.stock || 0),
+              status: product.status || "on_sale"
+            });
+          }
+        });
+        return result;
+      } catch (error) {
+        console.error("商品数据读取失败：", error);
+        return defaultProducts;
+      }
+    }
+
+    let products = loadCustomerProducts();
+
+    let currentCategory = "coffee";
+    let cart = [];
+    let orders = JSON.parse(localStorage.getItem("k_orders") || "[]");
+    let currentPaymentOrder = null;
+    let currentOrderTab = "unpaid";
+
+    // 渲染商品
+    function renderProducts() {
+      const list = document.getElementById("productList");
+      list.innerHTML = products[currentCategory].map((product, index) => {
+        return `
+  <div class="product-card"
+       onclick="showProductDetail(${index})">
+
+    <div class="product-image">
+      ${
+        product.image
+          ? `<img src="${product.image}" alt="${product.name}">`
+          : product.icon
+      }
+    </div>
+
+    <div class="product-info">
+      <div class="product-title">${product.name}</div>
+      <div class="product-desc">${product.desc}</div>
+
+      <div class="product-bottom">
+        <div class="price">${product.price}</div>
+
+        ${
+          product.status === "sold_out" || product.stock <= 0
+            ? `<span class="sold-out-text">已售罄</span>`
+            : `
+              <button
+                class="add-btn"
+                onclick="event.stopPropagation(); addToCart(${index})">
+                +
+              </button>
+            `
+        }
+      </div>
+    </div>
+  </div>
+`;
+      }).join("");
+    }
+
+    // 显示商品详情
+    function showProductDetail(index) {
+      const product = products[currentCategory][index];
+      const detailPage = document.getElementById("productDetailPage");
+      const detailContent = document.getElementById("productDetailContent");
+
+      document.getElementById("productPage").style.display = "none";
+      document.getElementById("minePage").style.display = "none";
+      document.getElementById("paymentPage").style.display = "none";
+      document.getElementById("ordersPage").style.display = "none";
+
+      document.querySelector(".shop-header").style.display = "none";
+      document.querySelector(".category-bar").style.display = "none";
+      document.querySelector(".cart-button").style.display = "none";
+      document.getElementById("cartPanel").classList.remove("show");
+
+      const mineHeader = document.querySelector(".mine-header");
+      if (mineHeader) {
+        mineHeader.style.display = "none";
+      }
+
+      detailPage.style.display = "block";
+
+      detailContent.innerHTML = `
+    <div class="detail-image">
+      ${
+        product.image
+          ? `<img src="${product.image}" alt="${product.name}">`
+          : product.icon
+      }
+    </div>
+
+    <div class="detail-title">
+      ${product.name}
+    </div>
+
+    <div class="detail-desc">
+      ${product.desc}
+    </div>
+
+    <div class="detail-price">
+      ${product.price}
+    </div>
+
+    ${
+      product.status === "sold_out" || product.stock <= 0
+        ? `<span class="sold-out-text">已售罄，无法加入购物车</span>`
+        : `<button class="detail-add-button" onclick="addDetailProduct(${index})">加入购物车</button>`
+    }
+  `;
+    }
+
+    // 从详情页加入购物车
+    function addDetailProduct(index) {
+      addToCart(index);
+      alert("已加入购物车");
+    }
+
+    // 从详情页返回商品页
+    function backFromDetail() {
+      const productButton = document.querySelector(".nav-item:first-child");
+      showPage("product", productButton);
+    }
+
+    // 切换商品分类
+    function changeCategory(button, category) {
+      currentCategory = category;
+      document.querySelectorAll(".category-item").forEach(item => {
+        item.classList.remove("active");
+      });
+      button.classList.add("active");
+      renderProducts();
+    }
+
+    // 加入购物车
+    function addToCart(index) {
+      const product = products[currentCategory][index];
+      if (product.status === "sold_out" || Number(product.stock || 0) <= 0) {
+        alert("该商品已售罄");
+        return;
+      }
+      const existing = cart.find(item => item.name === product.name);
+      if (existing) {
+        if (existing.quantity >= product.stock) {
+          alert("库存不足");
+          return;
+        }
+        existing.quantity++;
+      } else {
+        cart.push({
+          ...product,
+          quantity: 1
+        });
+      }
+      updateCart();
+    }
+
+    // 获取购物车总金额
+    function getCartTotal() {
+      return cart.reduce((sum, item) => {
+        return sum + item.price * item.quantity;
+      }, 0);
+    }
+
+    // 更新购物车
+    function updateCart() {
+      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const countElement = document.getElementById("cartCount");
+      const content = document.getElementById("cartContent");
+      countElement.textContent = count;
+      countElement.style.display = count > 0 ? "flex" : "none";
+      if (cart.length === 0) {
+        content.innerHTML = `
+          <div class="cart-empty">购物车还是空的</div>
+        `;
+        return;
+      }
+      content.innerHTML = `
+  <div class="cart-items">
+    ${cart.map(item => {
+      return `
+        <div class="cart-row">
+          <span>${item.name} × ${item.quantity}</span>
+          <span>¥${item.price * item.quantity}</span>
+        </div>
+      `;
+    }).join("")}
+  </div>
+
+  <div class="cart-total">
+    <span>合计</span>
+    <span>¥${getCartTotal()}</span>
+  </div>
+
+  <button class="pay-button" onclick="goToPayment()">
+    去支付
+  </button>
+`;
+    }
+
+    // 打开或关闭购物车
+    function toggleCart() {
+      document.getElementById("cartPanel").classList.toggle("show");
+    }
+
+    // 清空购物车
+    function clearCart() {
+      cart = [];
+      updateCart();
+    }
+
+    // 点击去支付
+    function goToPayment() {
+      if (cart.length === 0) {
+        alert("购物车为空，请先添加商品");
+        return;
+      }
+      const order = {
+        id: "K" + Date.now(),
+        items: cart.map(item => ({ ...item })),
+        total: getCartTotal(),
+        status: "unpaid",
+        address: "",
+        time: new Date().toLocaleString()
+      };
+      orders.unshift(order);
+      localStorage.setItem("k_orders", JSON.stringify(orders));
+      currentPaymentOrder = order;
+      cart = [];
+      updateCart();
+      document.getElementById("cartPanel").classList.remove("show");
+      showSpecialPage("payment");
+      renderPayment();
+    }
+
+    // 渲染支付页面
+    function renderPayment() {
+      const content = document.getElementById("paymentContent");
+      if (!currentPaymentOrder) {
+        content.innerHTML = `
+          <div class="empty-order">暂无待支付订单</div>
+        `;
+        return;
+      }
+      const order = currentPaymentOrder;
+      content.innerHTML = `
+        <div class="payment-box">
+          <div class="order-header">
+            <span>订单编号：${order.id}</span>
+            <span class="order-status">待支付</span>
+          </div>
+          <div class="address-box">
+            <label class="address-label" for="addressInput">
+              收货地址
+            </label>
+            <textarea
+              id="addressInput"
+              class="address-input"
+              placeholder="请输入详细收货地址"
+              rows="3"
+            >${order.address || ""}</textarea>
+          </div>
+          ${order.items.map(item => `
+            <div class="payment-row">
+              <span>${item.name} × ${item.quantity}</span>
+              <span>¥${item.price * item.quantity}</span>
+            </div>
+          `).join("")}
+          <div class="payment-total">
+            <span>应付金额</span>
+            <span>¥${order.total}</span>
+          </div>
+          <button class="confirm-pay-button" onclick="confirmPayment()">
+            确认支付 ¥${order.total}
+          </button>
+        </div>
+      `;
+    }
+
+    // 确认支付
+    function confirmPayment() {
+      if (!currentPaymentOrder) {
+        return;
+      }
+      const addressInput = document.getElementById("addressInput");
+      if (!addressInput) {
+        return;
+      }
+      const address = addressInput.value.trim();
+      if (!address) {
+        addressInput.classList.add("error");
+        addressInput.focus();
+        alert("请输入收货地址后再支付");
+        return;
+      }
+      addressInput.classList.remove("error");
+      const order = orders.find(item => {
+        return item.id === currentPaymentOrder.id;
+      });
+      if (!order || order.status === "paid") {
+        alert("该订单已经支付");
+        return;
+      }
+      // 保存收货地址
+      order.address = address;
+      order.status = "paid";
+      order.payTime = new Date().toLocaleString();
+      localStorage.setItem("k_orders", JSON.stringify(orders));
+
+      // 扣减库存
+      currentPaymentOrder.items.forEach(item => {
+        const savedProducts = JSON.parse(localStorage.getItem("k_products") || "[]");
+        const prod = savedProducts.find(p => p.id === item.id);
+        if (prod) {
+          prod.stock = Math.max(0, prod.stock - item.quantity);
+          if (prod.stock === 0) {
+            prod.status = "sold_out";
+          }
+        }
+        localStorage.setItem("k_products", JSON.stringify(savedProducts));
+        products = loadCustomerProducts();
+      });
+
+      currentPaymentOrder = null;
+      alert("支付成功！");
+      showOrders();
+      changeOrderTab(
+        "paid",
+        document.getElementById("paidTab")
+      );
+    }
+
+    // 渲染订单
+    function renderOrders() {
+      const content = document.getElementById("ordersContent");
+      const filteredOrders = orders.filter(order => {
+        return order.status === currentOrderTab;
+      });
+      // 已支付页面显示累计消费
+      const paidAmount = orders
+        .filter(order => order.status === "paid")
+        .reduce((sum, order) => sum + order.total, 0);
+      const consumptionHtml = currentOrderTab === "paid"
+        ? `
+          <div class="consumption-box">
+            <div class="consumption-label">累计消费</div>
+            <div class="consumption-amount">¥${paidAmount}</div>
+          </div>
+        `
+        : "";
+      if (filteredOrders.length === 0) {
+        content.innerHTML = `
+          ${consumptionHtml}
+          <div class="empty-order">
+            暂无${currentOrderTab === "unpaid" ? "未支付" : "已支付"}订单
+          </div>
+        `;
+        return;
+      }
+      content.innerHTML = `
+        ${consumptionHtml}
+        ${filteredOrders.map(order => {
+          const isPaid = order.status === "paid";
+          return `
+            <div class="order-card">
+              <div class="order-header">
+                <span>订单号：${order.id}</span>
+                <span class="order-status ${isPaid ? "paid" : ""}">
+                  ${isPaid ? "已支付" : "未支付"}
+                </span>
+              </div>
+              ${order.items.map(item => `
+                <div class="order-item">
+                  <span>${item.name} × ${item.quantity}</span>
+                  <span>¥${item.price * item.quantity}</span>
+                </div>
+              `).join("")}
+              ${
+                isPaid && order.address
+                  ? `
+                    <div class="order-item">
+                      <span>收货地址</span>
+                      <span>${order.address}</span>
+                    </div>
+                  `
+                  : ""
+              }
+              <div class="order-footer">
+                <span>合计：¥${order.total}</span>
+                ${
+                  isPaid
+                    ? `<span>支付时间：${order.payTime}</span>`
+                    : `
+                      <button
+                        class="small-pay-button"
+                        onclick="payExistingOrder('${order.id}')">
+                        去支付
+                      </button>
+                    `
+                }
+              </div>
+            </div>
+          `;
+        }).join("")}
+      `;
+    }
+
+    // 切换订单分类
+    function changeOrderTab(tab, button) {
+      currentOrderTab = tab;
+      document.querySelectorAll(".order-tab").forEach(item => {
+        item.classList.remove("active");
+      });
+      if (button) {
+        button.classList.add("active");
+      }
+      renderOrders();
+    }
+
+    // 支付已有的未支付订单
+    function payExistingOrder(orderId) {
+      const order = orders.find(item => item.id === orderId);
+      if (!order) {
+        return;
+      }
+      currentPaymentOrder = order;
+      showSpecialPage("payment");
+      renderPayment();
+    }
+
+    // 显示订单页面
+    function showOrders() {
+      showSpecialPage("orders");
+      renderOrders();
+    }
+
+    // 显示特殊页面
+    function showSpecialPage(page) {
+      document.getElementById("productPage").style.display = "none";
+      document.getElementById("productDetailPage").style.display = "none";
+      document.getElementById("minePage").style.display = "none";
+      document.getElementById("paymentPage").style.display = "none";
+      document.getElementById("ordersPage").style.display = "none";
+      document.querySelector(".shop-header").style.display = "none";
+      document.querySelector(".category-bar").style.display = "none";
+      document.querySelector(".cart-button").style.display = "none";
+      const mineHeader = document.querySelector(".mine-header");
+      if (mineHeader) {
+        mineHeader.style.display = "none";
+      }
+      document.getElementById("cartPanel").classList.remove("show");
+      if (page === "payment") {
+        document.getElementById("paymentPage").style.display = "block";
+      }
+      if (page === "orders" || page === "consumption") {
+        document.getElementById("ordersPage").style.display = "block";
+      }
+    }
+
+    // 返回商品页
+    function backToProduct() {
+      const productButton = document.querySelector(".nav-item:first-child");
+      showPage("product", productButton);
+    }
+
+    // 返回我的页面
+    function backToMine() {
+      const mineButton = document.querySelector(".nav-item:nth-child(2)");
+      showPage("mine", mineButton);
+    }
+
+    // 切换底部页面
+    function showPage(page, button) {
+      const productPage = document.getElementById("productPage");
+      const productDetailPage = document.getElementById("productDetailPage");
+      const minePage = document.getElementById("minePage");
+      const paymentPage = document.getElementById("paymentPage");
+      const ordersPage = document.getElementById("ordersPage");
+      const shopHeader = document.querySelector(".shop-header");
+      const categoryBar = document.querySelector(".category-bar");
+      const cartButton = document.querySelector(".cart-button");
+      const cartPanel = document.getElementById("cartPanel");
+      const mineHeader = document.querySelector(".mine-header");
+      productPage.style.display = "none";
+      productDetailPage.style.display = "none";
+      minePage.style.display = "none";
+      paymentPage.style.display = "none";
+      ordersPage.style.display = "none";
+      shopHeader.style.display = "none";
+      categoryBar.style.display = "none";
+      cartButton.style.display = "none";
+      cartPanel.classList.remove("show");
+      if (mineHeader) {
+        mineHeader.style.display = "none";
+      }
+      document.querySelectorAll(".nav-item").forEach(item => {
+        item.classList.remove("active");
+      });
+      button.classList.add("active");
+      if (page === "product") {
+        productPage.style.display = "block";
+        shopHeader.style.display = "flex";
+        categoryBar.style.display = "flex";
+        cartButton.style.display = "block";
+      }
+      if (page === "mine") {
+        minePage.style.display = "block";
+        if (mineHeader) {
+          mineHeader.style.display = "flex";
+        }
+      }
+    }
+
+    // 登录
+    function login() {
+      alert("请先登录");
+    }
+
+    // 其他菜单提示
+    function showMessage(title) {
+      alert(title + "功能暂未开放");
+    }
+
+    renderProducts();
+    updateCart();
+  </script>
+</body>
+</html>
